@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { apiGet, apiFetch } from "@/lib/api";
+import Link from "next/link";
+import { apiGet } from "@/lib/api";
 
 type Application = {
   id: string;
@@ -26,102 +27,21 @@ type ListResponse = {
 };
 
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
+  const styles: Record<string, string> = {
     PENDING: "bg-status-pending/10 text-status-pending border-status-pending/20",
     APPROVED: "bg-status-verified/10 text-status-verified border-status-verified/20",
-    UNDER_REVIEW: "bg-status-processing/10 text-status-processing border-status-processing/20",
+    UNDER_REVIEW: "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20",
     REJECTED: "bg-status-flagged/10 text-status-flagged border-status-flagged/20",
   };
-  const dotMap: Record<string, string> = {
+  const dots: Record<string, string> = {
     PENDING: "bg-status-pending", APPROVED: "bg-status-verified",
-    UNDER_REVIEW: "bg-status-processing animate-pulse", REJECTED: "bg-status-flagged",
+    UNDER_REVIEW: "bg-[#F59E0B] animate-pulse", REJECTED: "bg-status-flagged",
   };
   return (
-    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-chip-label text-chip-label border ${map[status] ?? "bg-surface-variant text-on-surface-variant border-glass-border"}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${dotMap[status] ?? "bg-on-surface-variant"}`} />
+    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-chip-label text-chip-label border ${styles[status] ?? "bg-surface-variant text-on-surface-variant border-glass-border"}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${dots[status] ?? "bg-on-surface-variant"}`} />
       {status.replace(/_/g, " ")}
     </span>
-  );
-}
-
-/* ── Detail Modal ───────────────────────────────────────────────────── */
-function AppModal({ app, onClose, onUpdate }: {
-  app: Application;
-  onClose: () => void;
-  onUpdate: (updated: Application) => void;
-}) {
-  const [busy, setBusy] = useState(false);
-
-  const updateStatus = async (status: string) => {
-    setBusy(true);
-    try {
-      const res = await apiFetch(`/providers/admin/${app.id}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-      });
-      if (res.ok) { const updated = await res.json(); onUpdate(updated); onClose(); }
-      else { const e = await res.json(); alert(e.detail ?? "Failed"); }
-    } catch { alert("Network error"); } finally { setBusy(false); }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
-      <div className="bg-[#111413] border border-glass-border rounded-3xl w-full max-w-xl overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="flex justify-between items-center p-6 border-b border-glass-border">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center border border-glass-border shrink-0">
-              <span className="material-symbols-outlined text-primary text-[20px]">eco</span>
-            </div>
-            <div>
-              <h3 className="font-header-section text-on-surface">{app.org_name}</h3>
-              <span className="font-data-mono text-xs text-primary/70">{app.id.slice(0, 12).toUpperCase()}</span>
-            </div>
-          </div>
-          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition-colors">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-
-        <div className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              ["Industry / Sector", app.operating_region],
-              ["Contact", app.contact_name],
-              ["Email", app.contact_email],
-              ["Website", app.website ?? "—"],
-              ["Applied", new Date(app.created_at).toISOString().replace("T", " ").slice(0, 16) + " UTC"],
-              ["Reviewed At", app.reviewed_at ? new Date(app.reviewed_at).toISOString().replace("T", " ").slice(0, 16) + " UTC" : "—"],
-            ].map(([label, val]) => (
-              <div key={label} className="bg-surface-container/40 rounded-xl p-3 border border-glass-border">
-                <span className="text-[10px] text-on-surface-variant uppercase tracking-wider block mb-1">{label}</span>
-                <span className="text-sm text-on-surface">{val}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-2">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider">Current Status</span>
-              <StatusBadge status={app.status} />
-            </div>
-            <div className="flex gap-3">
-              <button disabled={busy} onClick={() => updateStatus("APPROVED")}
-                className="flex-1 bg-status-verified/10 text-status-verified hover:bg-status-verified/20 border border-status-verified/30 py-2.5 rounded-xl font-chip-label text-chip-label transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                <span className="material-symbols-outlined text-[18px]">check_circle</span> Approve
-              </button>
-              <button disabled={busy} onClick={() => updateStatus("UNDER_REVIEW")}
-                className="flex-1 bg-surface-container/40 border border-glass-border hover:bg-white/5 text-on-surface py-2.5 rounded-xl font-chip-label text-chip-label transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                <span className="material-symbols-outlined text-[18px]">gavel</span> Review
-              </button>
-              <button disabled={busy} onClick={() => updateStatus("REJECTED")}
-                className="flex-1 bg-status-flagged/10 text-status-flagged hover:bg-status-flagged/20 border border-status-flagged/30 py-2.5 rounded-xl font-chip-label text-chip-label transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
-                <span className="material-symbols-outlined text-[18px]">cancel</span> Reject
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -130,7 +50,6 @@ export default function SponsorApplicationsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Application | null>(null);
 
   const load = useCallback(async (p: number) => {
     setLoading(true);
@@ -146,14 +65,8 @@ export default function SponsorApplicationsPage() {
     !search || a.org_name.toLowerCase().includes(search.toLowerCase()) || a.id.toLowerCase().includes(search.toLowerCase())
   ) ?? [];
 
-  const handleUpdate = (updated: Application) => {
-    setData(prev => prev ? { ...prev, items: prev.items.map(a => a.id === updated.id ? updated : a) } : prev);
-  };
-
   return (
     <div className="flex-1 px-section-gap py-12 h-screen overflow-y-auto z-10 relative">
-      {selected && <AppModal app={selected} onClose={() => setSelected(null)} onUpdate={handleUpdate} />}
-
       <div className="fixed top-[10%] right-[10%] w-[60vw] h-[60vw] bg-[radial-gradient(circle,_rgba(38,163,122,0.05)_0%,_rgba(17,20,19,0)_70%)] pointer-events-none -z-10" />
 
       <header className="flex flex-row justify-between items-end mb-10 w-full max-w-7xl mx-auto">
@@ -176,7 +89,7 @@ export default function SponsorApplicationsPage() {
           {[
             { label: "Total", value: data.total, color: "text-on-surface" },
             { label: "Pending", value: data.status_counts["PENDING"] ?? 0, color: "text-status-pending" },
-            { label: "Under Review", value: data.status_counts["UNDER_REVIEW"] ?? 0, color: "text-status-processing" },
+            { label: "Under Review", value: data.status_counts["UNDER_REVIEW"] ?? 0, color: "text-[#F59E0B]" },
             { label: "Approved", value: data.status_counts["APPROVED"] ?? 0, color: "text-status-verified" },
           ].map(stat => (
             <div key={stat.label} className="bg-surface-dark/40 border border-glass-border rounded-xl p-4">
@@ -199,6 +112,7 @@ export default function SponsorApplicationsPage() {
               <thead>
                 <tr className="border-b border-glass-border">
                   <th className="py-4 px-6 font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider">Organization & ID</th>
+                  <th className="py-4 px-6 font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider">Industry / Sector</th>
                   <th className="py-4 px-6 font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider">Contact</th>
                   <th className="py-4 px-6 font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider">Applied Date</th>
                   <th className="py-4 px-6 font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider">Status</th>
@@ -219,6 +133,7 @@ export default function SponsorApplicationsPage() {
                         </div>
                       </div>
                     </td>
+                    <td className="py-5 px-6"><span className="text-sm text-on-surface-variant">{app.operating_region}</span></td>
                     <td className="py-5 px-6"><span className="text-sm text-on-surface-variant">{app.contact_name}</span></td>
                     <td className="py-5 px-6">
                       <span className="font-data-mono text-data-mono text-on-surface-variant">
@@ -227,14 +142,17 @@ export default function SponsorApplicationsPage() {
                     </td>
                     <td className="py-5 px-6"><StatusBadge status={app.status} /></td>
                     <td className="py-5 px-6 text-right">
-                      <button onClick={() => setSelected(app)} className="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
-                        <span className="material-symbols-outlined">arrow_forward_ios</span>
-                      </button>
+                      <Link
+                        href={`/admin/sponsor-applications/${app.id}`}
+                        className="inline-flex items-center gap-1.5 p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors border border-transparent hover:border-primary/20"
+                      >
+                        <span className="material-symbols-outlined">arrow_forward</span>
+                      </Link>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={5} className="py-12 text-center text-on-surface-variant">No sponsor applications found.</td></tr>
+                  <tr><td colSpan={6} className="py-12 text-center text-on-surface-variant">No sponsor applications found.</td></tr>
                 )}
               </tbody>
             </table>
