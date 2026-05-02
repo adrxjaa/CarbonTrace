@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
     # Create DB tables (dev mode — use Alembic in production)
     await create_tables()
-    print(f"\n✅ CarbonTrace API ready — {settings.app_env.upper()} mode")
+    print(f"\n[OK] CarbonTrace API ready - {settings.app_env.upper()} mode")
     print(f"   Docs: http://localhost:8000/docs\n")
     yield
     # Shutdown (nothing to clean up for now)

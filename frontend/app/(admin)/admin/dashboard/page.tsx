@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiFetch, API_BASE } from "@/lib/api";
 
 type Stats = {
   active_users: number;
@@ -37,9 +36,79 @@ type DashboardData = {
   flagged_submissions: FlaggedSubmission[];
 };
 
+/* ── Flagged Submission Drawer ────────────────────────── */
+function InspectDrawer({ sub, onClose, onStatusChange }: {
+  sub: FlaggedSubmission;
+  onClose: () => void;
+  onStatusChange: (id: string, status: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState("");
+
+  const update = async (status: string) => {
+    setBusy(true);
+    try {
+      const res = await apiFetch(`/submissions/admin/${sub.id}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ status, reason: note || undefined }),
+      });
+      if (res.ok) { onStatusChange(sub.id, status); onClose(); }
+      else { const e = await res.json(); alert(e.detail ?? "Failed"); }
+    } catch { alert("Network error"); } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
+      <div className="bg-[#111413] border border-glass-border rounded-3xl w-full max-w-lg overflow-hidden" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center p-6 border-b border-glass-border">
+          <div>
+            <h3 className="font-header-section text-on-surface capitalize">{sub.activity_type.replace(/_/g, " ")}</h3>
+            <span className="font-data-mono text-xs text-status-flagged">{sub.id.slice(0, 16)}…</span>
+          </div>
+          <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface"><span className="material-symbols-outlined">close</span></button>
+        </div>
+        <div className="p-6 space-y-4">
+          {sub.image_url && (
+            <img src={`${API_BASE}${sub.image_url}`} alt="Evidence" className="w-full h-40 object-cover rounded-xl border border-glass-border" />
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              ["User ID", sub.user_id.slice(0, 16) + "…"],
+              ["AI Confidence", sub.confidence != null ? `${sub.confidence}%` : "—"],
+              ["Flag Reason", sub.flag_reason ?? "—"],
+            ].map(([label, val]) => (
+              <div key={label} className="bg-surface-container/40 rounded-xl p-3 border border-glass-border col-span-1">
+                <span className="text-[10px] text-on-surface-variant uppercase tracking-wider block mb-1">{label}</span>
+                <span className="text-sm text-on-surface">{val}</span>
+              </div>
+            ))}
+          </div>
+          <div>
+            <label className="font-chip-label text-chip-label text-on-surface-variant uppercase tracking-wider block mb-2">Admin Note</label>
+            <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
+              className="w-full bg-surface-container border border-glass-border rounded-xl px-4 py-2 text-sm text-on-surface placeholder-on-surface-variant/50 focus:ring-1 focus:ring-primary focus:outline-none resize-none"
+              placeholder="Reason for action..." />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <button disabled={busy} onClick={() => update("VERIFIED")}
+              className="flex-1 bg-status-verified/10 text-status-verified hover:bg-status-verified/20 border border-status-verified/30 py-2.5 rounded-xl font-chip-label text-chip-label transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+              <span className="material-symbols-outlined text-[18px]">check_circle</span> Approve
+            </button>
+            <button disabled={busy} onClick={() => update("REJECTED")}
+              className="flex-1 bg-status-flagged/10 text-status-flagged hover:bg-status-flagged/20 border border-status-flagged/30 py-2.5 rounded-xl font-chip-label text-chip-label transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+              <span className="material-symbols-outlined text-[18px]">cancel</span> Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [inspecting, setInspecting] = useState<FlaggedSubmission | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -55,6 +124,14 @@ export default function AdminDashboardPage() {
     loadData();
   }, []);
 
+  const handleStatusChange = (id: string, status: string) => {
+    setData(prev => prev ? {
+      ...prev,
+      flagged_submissions: prev.flagged_submissions.filter(s => s.id !== id),
+      stats: { ...prev.stats, flagged_submissions: Math.max(0, prev.stats.flagged_submissions - 1) },
+    } : prev);
+  };
+
   if (loading || !data) {
     return (
       <div className="p-container-padding flex-grow pt-8 space-y-section-gap flex justify-center items-center h-full">
@@ -64,6 +141,14 @@ export default function AdminDashboardPage() {
   }
 
   return (
+    <>
+    {inspecting && (
+      <InspectDrawer
+        sub={inspecting}
+        onClose={() => setInspecting(null)}
+        onStatusChange={handleStatusChange}
+      />
+    )}
     <div className="p-container-padding flex-grow pt-8 space-y-section-gap pb-32 lg:pb-12">
       <div className="flex justify-between items-end mb-8">
         <div>
@@ -335,7 +420,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <p className="text-sm font-medium text-on-surface mb-1 truncate capitalize">{sub.activity_type.replace('_', ' ')}</p>
                 <p className="text-xs font-data-mono text-on-surface-variant mb-4">User: USR-{sub.user_id.slice(0,4)}</p>
-                <button className="mt-auto w-full py-1.5 rounded border border-outline-variant text-xs font-medium text-on-surface hover:bg-surface-variant transition-colors">
+                <button onClick={() => setInspecting(sub)} className="mt-auto w-full py-1.5 rounded border border-outline-variant text-xs font-medium text-on-surface hover:bg-surface-variant transition-colors">
                   Inspect
                 </button>
               </div>
@@ -358,6 +443,7 @@ export default function AdminDashboardPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }
 

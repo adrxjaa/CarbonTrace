@@ -191,3 +191,58 @@ async def admin_list_sponsor_applications(
         "total_pages": max(1, -(-total // page_size)),
         "status_counts": status_counts,
     }
+
+
+@router.get(
+    "/admin/{application_id}",
+    response_model=ProviderApplicationOut,
+    summary="[Admin] Get a single provider/sponsor application by ID",
+)
+async def admin_get_application(
+    application_id: uuid.UUID,
+    _: CurrentAdmin,
+    db: AsyncSession = Depends(get_db),
+) -> ProviderApplicationOut:
+    from fastapi import HTTPException
+    result = await db.execute(select(ProviderApplication).where(ProviderApplication.id == application_id))
+    app = result.scalar_one_or_none()
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return ProviderApplicationOut.model_validate(app)
+
+
+from pydantic import BaseModel as _BaseModel
+from datetime import datetime as _dt, timezone as _tz
+
+
+class ApplicationStatusUpdate(_BaseModel):
+    status: str
+    notes: str | None = None
+
+
+@router.patch(
+    "/admin/{application_id}/status",
+    response_model=ProviderApplicationOut,
+    summary="[Admin] Update a provider/sponsor application status",
+)
+async def admin_update_application_status(
+    application_id: uuid.UUID,
+    body: ApplicationStatusUpdate,
+    _: CurrentAdmin,
+    db: AsyncSession = Depends(get_db),
+) -> ProviderApplicationOut:
+    from fastapi import HTTPException
+    allowed = {"PENDING", "UNDER_REVIEW", "APPROVED", "REJECTED"}
+    if body.status not in allowed:
+        raise HTTPException(status_code=400, detail=f"Status must be one of {allowed}")
+
+    result = await db.execute(select(ProviderApplication).where(ProviderApplication.id == application_id))
+    app = result.scalar_one_or_none()
+    if not app:
+        raise HTTPException(status_code=404, detail="Application not found")
+
+    app.status = body.status
+    app.reviewed_at = _dt.now(_tz.utc)
+    await db.commit()
+    await db.refresh(app)
+    return ProviderApplicationOut.model_validate(app)

@@ -35,6 +35,9 @@ class ProviderApplicationOut(BaseModel):
     website: str | None
     contact_name: str
     contact_email: str
+    contact_designation: str | None
+    activity_description: str | None
+    expected_monthly_volume: str | None
     status: str
     created_at: datetime
     reviewed_at: datetime | None
