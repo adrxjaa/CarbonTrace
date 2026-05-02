@@ -21,8 +21,83 @@
   --color-deep: var(--deep-green);
   --color-warm: var(--warm-gray);
   --color-body: var(--body-text);
+  
+  /* MD3 Admin Dashboard Colors */
+  --color-surface-dark: #111C18;
+  --color-surface-container: #1d201f;
+  --color-surface-container-low: #191c1b;
+  --color-surface-container-lowest: #0c0f0e;
+  --color-surface-container-high: #272b29;
+  --color-surface-container-highest: #323534;
+  --color-surface-variant: #323534;
+  --color-surface-light: #F8FAF9;
+  --color-surface-dim: #111413;
+  --color-surface-bright: #373a38;
+  
+  --color-on-surface: #e1e3e0;
+  --color-on-surface-variant: #bccac1;
+  --color-inverse-surface: #e1e3e0;
+  --color-inverse-on-surface: #2e312f;
+  
+  --color-primary: #68dbae;
+  --color-on-primary: #003827;
+  --color-primary-container: #26a37a;
+  --color-on-primary-container: #003121;
+  --color-primary-fixed: #86f8c9;
+  --color-on-primary-fixed: #002115;
+  --color-primary-fixed-dim: #68dbae;
+  --color-on-primary-fixed-variant: #00513a;
+  --color-inverse-primary: #006c4e;
+  
+  --color-secondary: #84d6b9;
+  --color-on-secondary: #00382a;
+  --color-secondary-container: #026951;
+  --color-on-secondary-container: #92e5c7;
+  --color-secondary-fixed: #a0f3d4;
+  --color-on-secondary-fixed: #002117;
+  --color-secondary-fixed-dim: #84d6b9;
+  --color-on-secondary-fixed-variant: #00513e;
+  
+  --color-tertiary: #8dd4bd;
+  --color-on-tertiary: #00382c;
+  --color-tertiary-container: #589d88;
+  --color-on-tertiary-container: #003025;
+  --color-tertiary-fixed: #a9f1d9;
+  --color-on-tertiary-fixed: #002018;
+  --color-tertiary-fixed-dim: #8dd4bd;
+  --color-on-tertiary-fixed-variant: #005140;
+  
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-on-error-container: #ffdad6;
+  
+  --color-status-pending: #F59E0B;
+  --color-status-verified: #10B981;
+  --color-status-flagged: #EF4444;
+  --color-status-processing: #3B82F6;
+  
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-outline: #87948c;
+  --color-outline-variant: #3d4943;
+  
+  /* Font Families */
+  --font-data-mono: "Space Grotesk", sans-serif;
+  --font-header-section: "Inter", sans-serif;
+  --font-body-main: "Inter", sans-serif;
+  --font-stat-value: "Space Grotesk", sans-serif;
+  --font-chip-label: "Inter", sans-serif;
+  --font-display-hero: "Inter", sans-serif;
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Spacing */
+  --spacing-unit: 8px;
+  --spacing-section-gap: 4rem;
+  --spacing-grid-gutter: 1.5rem;
+  --spacing-card-inner: 1.5rem;
+  --spacing-container-padding: 2rem;
 }
 
 * {
@@ -39,12 +114,10 @@ body {
   background:
     radial-gradient(circle at top left, rgba(29, 158, 117, 0.12), transparent 24%),
     linear-gradient(180deg, #f7fbf8 0%, #eeede6 100%);
-  color: var(--body-text);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
 a {
-  color: inherit;
   text-decoration: none;
 }
 
