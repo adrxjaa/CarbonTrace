@@ -10,7 +10,7 @@ const AUTH_PREFIXES = [
   "/provider-register", "/sponsor-register",
   "/dashboard", "/activities", "/submit", "/leaderboard", "/wallet",
   "/profile", "/verification",
-  "/admin",
+  "/admin", "/sponsor",
 ];
 
 function isAuthRoute(pathname: string) {
