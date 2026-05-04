@@ -5,7 +5,7 @@ export default function AnalyticsOverview() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold font-sans tracking-tight text-[#111C18] mb-2">Analytics Overview</h1>
+            <h1 className="text-4xl font-bold font-sans tracking-tight text-white mb-2">Analytics Overview</h1>
             <div className="flex items-center gap-2 text-[#87948c] text-sm">
               <div className="w-2 h-2 rounded-full bg-[#10B981]"></div>
               Live Sync • Epoch 4291

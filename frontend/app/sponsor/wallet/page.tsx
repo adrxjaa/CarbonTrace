@@ -4,8 +4,8 @@ export default function SponsorWallet() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="max-w-[600px]">
-          <h1 className="text-4xl font-bold font-sans tracking-tight text-[#111C18] mb-2">Sponsor Wallet</h1>
-          <p className="text-[#87948c] text-sm leading-relaxed">
+          <h1 className="text-4xl font-bold font-sans tracking-tight text-white mb-2">Sponsor Wallet</h1>
+          <p className="text-[#4d5c55] text-sm leading-relaxed">
             Manage your credit pool balances, execute blockchain deposits, and review your immutable funding transaction history.
           </p>
         </div>

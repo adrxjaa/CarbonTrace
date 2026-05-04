@@ -4,7 +4,7 @@ export default function SponsorDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold font-sans tracking-tight text-[#111C18] mb-2">Sponsor Overview</h1>
+          <h1 className="text-4xl font-bold font-sans tracking-tight text-white mb-2">Sponsor Overview</h1>
           <p className="text-[#87948c] text-sm">Monitor program performance and collective impact.</p>
         </div>
         <div className="bg-[#111C18] border border-[rgba(255,255,255,0.08)] px-4 py-2 rounded-[12px] text-sm text-[#87948c]">
