@@ -2,13 +2,13 @@
 
 A blockchain-powered sustainability platform that verifies eco-friendly activities and rewards users with carbon credits and incentives. The system combines AI-assisted feature extraction, backend validation, and blockchain technology to create a transparent and tamper-resistant verification pipeline.
 
----
+
 
 ## Overview
 
 Users upload sustainability evidence such as EV charging receipts, public transport tickets, tree planting images, or recycling proof. The system extracts relevant information using AI models and validates authenticity through backend rule-based verification. Verified activities are recorded on blockchain and reward tokens are issued to users.
 
----
+
 
 ## Features
 
@@ -25,30 +25,6 @@ Users upload sustainability evidence such as EV charging receipts, public transp
 - Dashboard analytics and sustainability tracking
 - Provider QR-based verification support
 
----
-
-## System Architecture
-
-```text
-Next.js + TypeScript Frontend
-            ↓
-      FastAPI Backend
-            ↓
- YOLO + OCR Feature Extraction
-            ↓
-Backend Validation Logic
-(Hash checks + Rules + Fraud Detection)
-            ↓
-Smart Contract
-            ↓
-Ethereum Blockchain
-            ↓
-Carbon Credits / Tokens
-            ↓
-Dashboard Update
-```
-
----
 
 ## Verification Flow
 
@@ -66,8 +42,6 @@ Dashboard Update
 6. Verified activities are sent to blockchain  
 7. Smart contract stores records and issues rewards  
 8. Dashboard reflects updated status  
-
----
 
 ## Technology Stack
 
@@ -95,7 +69,6 @@ Dashboard Update
 - Docker
 - Cloudflare Tunnel
 
----
 
 ## Smart Contract Role
 
@@ -112,7 +85,6 @@ Architecture used:
 
 **Off-chain verification + On-chain recording**
 
----
 
 ## Provider Integration
 
@@ -132,7 +104,7 @@ QR data includes:
 - Session details
 - Secure hash/signature
 
----
+
 
 ## Wallet Integration
 
